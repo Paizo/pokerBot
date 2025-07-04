@@ -100,8 +100,12 @@ public class PokerWebSocketClient extends WebSocketClient {
             return;
         }
 
-        Map<String, Object> actionPayload = BotLogic.decideAction(botName, playerId, state, myHand);
-        sendJson("action", actionPayload);
+        String actionPayload = BotLogic.decideAction(botName, playerId, state, myHand);
+        sendPlainJson(actionPayload);
+    }
+
+    private void sendPlainJson(String json) {
+        send(json);
     }
 
     private void sendJson(String type, Object payload) {

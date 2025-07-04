@@ -2,18 +2,66 @@ package io.sytac.poker.bluffer.service;
 
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.sytac.poker.bluffer.client.LLMClient;
 import io.sytac.poker.bluffer.model.Card;
 import io.sytac.poker.bluffer.model.GameState;
+import io.sytac.poker.bluffer.model.Player;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
 public class BotLogic {
+    private static LLMClient llmClient = new LLMClient();
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
-    public static Map<String, Object> decideAction(String botName, String id, GameState state, List<Card> hand) {
+    @SneakyThrows
+    public static String decideAction(String botName, String id, GameState state, List<Card> hand) {
+
+        String response = llmClient.ask(
+"You are an expert Texas Hold'em poker AI. Based on the input JSON below, choose the best next action and respond only with the exact JSON action object as shown.\n" +
+        "Do not include any explanation, commentary, or additional text — only return the JSON.\n" +
+        "Input:\n" +
+        objectMapper.writeValueAsString(state) + "\n" +
+        "Actions you can choose from (use this exact JSON format):\n" +
+        "Fold:\n" +
+        "{ \"type\": \"action\", \"payload\": { \"actionType\": \"fold\" } }\n" +
+        "Call:\n" +
+        "{ \"type\": \"action\", \"payload\": { \"actionType\": \"call\" } }\n" +
+        "Raise (specify amount):\n" +
+        "{ \"type\": \"action\", \"payload\": { \"actionType\": \"raise\", \"amount\": 100 } }\n" +
+        "Check (only if allowed):\n" +
+        "{ \"type\": \"action\", \"payload\": { \"actionType\": \"check\" } }\n" +
+        "Evaluate your decision based on:\n" +
+        "Strength of the player's hand (hole cards + community cards)\n" +
+        "Pot odds and bet size\n" +
+        "Player's available chips\n" +
+        "Risk vs reward\n" +
+        "Be mindful of the game state, minimum amount for raise is minimum raise amount + minimum call amount.\n" +
+        "Return only one JSON object from above — nothing else."
+        );
+
+        log.info("[{}][{}]AI response: {}", botName, id, response);
+        response = cleanupResponse(response);
+//        Map responseMap = objectMapper.readValue(response, Map.class);
+
+//        log.info("[{}][{}]Decided action: {}, payload [{}], state[{}]", botName, id, responseMap.get("action"), responseMap, state);
+
+        return response;
+//        return responseMap;
+    }
+
+    private static String cleanupResponse(String response) {
+        return response
+                .replace("```json", "")
+                .replace("```", "");
+    }
+
+
+    public static Map<String, Object> decideActionOld(String botName, String id, GameState state, List<Card> hand) {
         String action;
         int callAmount = state.getMinimumBetForCall();
         int raiseAmount = state.getMinimumRaiseAmount();
