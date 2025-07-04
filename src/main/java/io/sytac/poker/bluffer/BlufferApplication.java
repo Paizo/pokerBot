@@ -10,7 +10,7 @@ public class BlufferApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(BlufferApplication.class, args);
 //		PokerWebSocketClient bot = new PokerWebSocketClient("ws://192.168.1.239:8080", "MyBot");
-		PokerWebSocketClient bot = new PokerWebSocketClient("ws://localhost:8080", "MyBot");
+		PokerWebSocketClient bot = new PokerWebSocketClient("ws://localhost:8080", "Bluffer");
 		bot.connect();
 	}
 
