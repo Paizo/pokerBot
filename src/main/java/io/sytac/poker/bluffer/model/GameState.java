@@ -1,10 +1,12 @@
 package io.sytac.poker.bluffer.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
+@AllArgsConstructor
 public class GameState {
     private List<Player> players;
     private List<Card> communityCards;
@@ -15,6 +17,4 @@ public class GameState {
     private String message;
     private int minimumRaiseAmount;
     private int minimumBetForCall;
-
-    // Getters and Setters...
 }

@@ -1,8 +1,10 @@
 package io.sytac.poker.bluffer.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class Player {
     private String id;
     private String name;
@@ -13,6 +15,4 @@ public class Player {
     private boolean isSmallBlind;
     private boolean isBigBlind;
     private boolean isSpectator;
-
-    // Getters and Setters...
 }
