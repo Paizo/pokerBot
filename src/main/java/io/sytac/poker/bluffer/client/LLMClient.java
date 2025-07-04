@@ -17,10 +17,12 @@ import java.util.Map;
 public class LLMClient {
 
 //    private static final URI OPENAI_URL = URI.create("http://localhost:11434/v1/chat/completions");
+    //LOCAL OLLAMA phi4:14b-q4_K_M
     private static final URI OPENAI_URL = URI.create("http://localhost:11434/api/generate");
+//    private static final URI OPENAI_URL = URI.create("https://api.openai.com/v1/chat/completions");
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public String ask(String prompt) {
+    public String askOllama(String prompt) {
         System.out.println("Asking AI: " + prompt);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -30,6 +32,7 @@ public class LLMClient {
 //        message.put("role", "user");
 //        message.put("content", prompt);
 
+        //FOR LOCAL OLLAMA
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "phi4:14b-q4_K_M");
         requestBody.put("prompt", prompt);
@@ -49,5 +52,42 @@ public class LLMClient {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public String callOpenAI(String promptText) {
+        // Prepare headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+//        headers.setBearerAuth(OPENAI_API_KEY); // Sets "Authorization: Bearer <API_KEY>"
+
+        // Prepare the messages
+        List<Map<String, String>> messages = List.of(
+                Map.of("role", "user", "content", promptText)
+        );
+
+        // Request body
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", "gpt-4o");
+        requestBody.put("messages", messages);
+        requestBody.put("temperature", 0.2);
+        requestBody.put("stream", false);
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+        try {
+            ResponseEntity<Map> response = restTemplate.postForEntity(OPENAI_URL, request, Map.class);
+            if (response.getBody() != null) {
+                List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
+                if (choices != null && !choices.isEmpty()) {
+                    Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+                    return message.get("content").toString();
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error calling OpenAI: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

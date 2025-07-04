@@ -21,7 +21,7 @@ public class BotLogic {
     @SneakyThrows
     public static String decideAction(String botName, String id, GameState state, List<Card> hand) {
 
-        String response = llmClient.ask(
+        String response = llmClient.askOllama(
 "You are an expert Texas Hold'em poker AI. Based on the input JSON below, choose the best next action and respond only with the exact JSON action object as shown.\n" +
         "Do not include any explanation, commentary, or additional text — only return the JSON.\n" +
         "Input:\n" +
@@ -41,6 +41,7 @@ public class BotLogic {
         "Player's available chips\n" +
         "Risk vs reward\n" +
         "Be mindful of the game state, minimum amount for raise is minimum raise amount + minimum call amount.\n" +
+        "yes also the game state may contains error expecially on minumum call and raise, so consider if the previous player for example is big blind then you need to call with the big blind amount.\n" +
         "Return only one JSON object from above — nothing else."
         );
 
